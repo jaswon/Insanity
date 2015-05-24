@@ -20,6 +20,16 @@ window.onload = function() {
     cvs.width = screen_size;
     cvs.height = screen_size;
 
+
+    // Create a canvas that we will use as a mask
+    var maskCanvas = document.createElement('canvas')
+    // Ensure same dimensions
+    maskCanvas.width = cvs.width
+    maskCanvas.height = cvs.height
+    var maskCtx = maskCanvas.getContext('2d')
+    // maskCtx.globalCompositeOperation = 'xor';
+
+
     // init maze
     var maze = [];
 
@@ -76,7 +86,7 @@ window.onload = function() {
     var step = .2;
     var anim = [0,0];
 
-    window.onkeyup = function(e) {
+    window.onkeydown = function(e) {
         var key = e.keyCode ? e.keyCode : e.which;
         if (key > 36 && key < 41) {
             movequeue.unshift(key);
@@ -85,6 +95,9 @@ window.onload = function() {
 
     // rAF animate
     var animate = function() {
+
+        var exit = window.requestAnimationFrame( animate );
+        cvs.width = cvs.width;
 
         if (moving) {
             anim[1-movedir%2] += ((movedir>38)?1:-1)*step;
@@ -96,16 +109,14 @@ window.onload = function() {
         } else {
             if (movequeue.length) {
                 movedir = movequeue.pop();
+
                 moving = true;
             }
         }
 
-        var exit = window.requestAnimationFrame( animate );
-        cvs.width = cvs.width;
-
         for (var i = 0; i < segm_size; i++) {
             for (var j = 0 ; j < segm_size; j++) {
-                ctx.fillStyle = (maze[j][i])?(2==maze[j][i]?'green':'black'):'white';
+                ctx.fillStyle = (maze[j][i])?'black':'white';
                 ctx.fillRect(j*wall_size,i*wall_size,wall_size,wall_size)
             }
         }
@@ -114,6 +125,14 @@ window.onload = function() {
         ctx.arc((player[0]+anim[0]+.5)*wall_size,(player[1]+anim[1]+.5)*wall_size, wall_size/2-5, 0, 2*Math.PI)
         ctx.fill();
 
+        var gradient = maskCtx.createRadialGradient((player[0]+anim[0]+.5)*wall_size,(player[1]+anim[1]+.5)*wall_size,50,(player[0]+anim[0]+.5)*wall_size,(player[1]+anim[1]+.5)*wall_size,0);
+        gradient.addColorStop(1,'rgba(0,0,0,0)');
+        gradient.addColorStop(0,'black');
+        maskCanvas.width = maskCanvas.width;
+        maskCtx.fillStyle = gradient;
+        maskCtx.fillRect(0,0,maskCanvas.width,maskCanvas.height);
+
+        ctx.drawImage(maskCanvas, 0, 0);
     }
 
     animate();
