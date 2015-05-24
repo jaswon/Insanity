@@ -1,7 +1,7 @@
 window.onload = function() {
     // constants
     var screen_size = Math.min(document.body.clientWidth,document.body.clientHeight)-50
-    var maze_size = 20
+    var maze_size = 5 // MUST BE ODD
     var segm_size = 2*maze_size+1
     var wall_size = screen_size/segm_size
 
@@ -31,11 +31,12 @@ window.onload = function() {
         maze[i] = row;
     }
 
-    maze[9][0] = 0;
+    maze[0][maze_size] = 0;
+    maze[segm_size-1][maze_size] = 0;
 
     // generate maze
 
-    var cur = [9,1]
+    var cur = [1,maze_size]
     var path = [cur];
     var visited = [];
     for (var i = 0 ; i < segm_size ; i++) {
@@ -65,17 +66,53 @@ window.onload = function() {
         }
     }
 
+    // player stuff
+
+    var player = [0,maze_size]
+    var prev;
+    var movedir;
+    var movequeue = [];
+    var moving = false;
+    var step = .2;
+    var anim = [0,0];
+
+    window.onkeyup = function(e) {
+        var key = e.keyCode ? e.keyCode : e.which;
+        if (key > 36 && key < 41) {
+            movequeue.unshift(key);
+        }
+    }
+
     // rAF animate
     var animate = function() {
+
+        if (moving) {
+            anim[1-movedir%2] += ((movedir>38)?1:-1)*step;
+            if (Math.abs(anim[0]) > 1 || Math.abs(anim[1]) > 1) {
+                player[1-movedir%2] += (movedir>38)?1:-1;
+                anim = [0,0];
+                moving = false;
+            }
+        } else {
+            if (movequeue.length) {
+                movedir = movequeue.pop();
+                moving = true;
+            }
+        }
+
         var exit = window.requestAnimationFrame( animate );
         cvs.width = cvs.width;
 
         for (var i = 0; i < segm_size; i++) {
             for (var j = 0 ; j < segm_size; j++) {
-                ctx.fillStyle = (maze[i][j])?'black':'white';
+                ctx.fillStyle = (maze[j][i])?(2==maze[j][i]?'green':'black'):'white';
                 ctx.fillRect(j*wall_size,i*wall_size,wall_size,wall_size)
             }
         }
+
+        ctx.beginPath();
+        ctx.arc((player[0]+anim[0]+.5)*wall_size,(player[1]+anim[1]+.5)*wall_size, wall_size/2-5, 0, 2*Math.PI)
+        ctx.fill();
 
     }
 
