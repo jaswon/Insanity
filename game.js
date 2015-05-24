@@ -1,7 +1,7 @@
 window.onload = function() {
     // constants
     var screen_size = Math.min(document.body.clientWidth,document.body.clientHeight)-50
-    var maze_size = 9
+    var maze_size = 20
     var segm_size = 2*maze_size+1
     var wall_size = screen_size/segm_size
 
@@ -47,25 +47,19 @@ window.onload = function() {
     }
     visited[cur[0]][cur[1]] = true;
 
-    var nextDirs = function(cell) {
-        return [[2,0],[0,-2],[-2,0],[0,2]].filter(function(next){
-            return maze[cell[0]+next[0]] != undefined &&
-                   maze[cell[0]+next[0]][cell[1]+next[1]] != undefined &&
-                   !visited[cell[0]+next[0]][cell[1]+next[1]]
-        })
-    }
-
-    var breakWall = function(cell, dir) {
-        maze[cell[0]+dir[0]/2][cell[1]+dir[1]/2] = 0;
-        visited[cell[0]+dir[0]][cell[1]+dir[1]] = true;
-        cur = [cell[0]+dir[0],cell[1]+dir[1]]
-        path.push(cur)
-    }
-
     while (path.length) {
-        var dirs = nextDirs(cur)
+        var dirs = [[2,0],[0,-2],[-2,0],[0,2]].filter(function(next){
+            return maze[cur[0]+next[0]] != undefined &&
+                   maze[cur[0]+next[0]][cur[1]+next[1]] != undefined &&
+                   !visited[cur[0]+next[0]][cur[1]+next[1]]
+        })
         if (dirs.length) {
-            breakWall(cur, random(dirs))
+            (function(cell, dir) {
+                maze[cell[0]+dir[0]/2][cell[1]+dir[1]/2] = 0;
+                visited[cell[0]+dir[0]][cell[1]+dir[1]] = true;
+                cur = [cell[0]+dir[0],cell[1]+dir[1]]
+                path.push(cur)
+            })(cur, random(dirs))
         } else {
             cur = path.pop();
         }
