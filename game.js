@@ -5,8 +5,10 @@ window.onload = function() {
     var segm_size = 2*maze_size+1
     var wall_size = screen_size/segm_size
     var maze;
-    var splatter = new Image();   // Create new img element
+    var splatter = new Image();
     splatter.src = 'splatter.png';
+    var title = "Insanity"
+    var quote = '"Insanity is doing the same thing over and over and expecting different results."'
 
     function shuffle(o){
         for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
@@ -20,9 +22,12 @@ window.onload = function() {
     // init canvas
     var cvs = document.getElementById('main')
     var ctx = cvs.getContext('2d')
-    cvs.width = screen_size+200;
-    cvs.height = screen_size;
+    // cvs.width = screen_size;
+    // cvs.height = screen_size;
+    ctx.canvas.width  = window.innerWidth;
+    ctx.canvas.height = window.innerHeight;
     ctx.strokeStyle = 'black'
+
 
     var genMaze = function() {
         // init maze
@@ -77,17 +82,19 @@ window.onload = function() {
     var player = [0,maze_size]
     var prev;
     var movedir;
-    var movequeue = [];
+    var movequeue = [39];
     var moving = false;
     var step = .2;
     var anim = [0,0];
     var splatters = [];
     var flash = 0;
+    var deaths = 0;
+    var level = 1;
 
     window.onkeydown = function(e) {
         var key = e.keyCode ? e.keyCode : e.which;
-        if (key > 36 && key < 41) {
-            movequeue.unshift(key);
+        if (key > 36 && key < 41 && !moving) {
+            movequeue.unshift(key,key);
         }
     }
 
@@ -96,6 +103,8 @@ window.onload = function() {
 
         var exit = window.requestAnimationFrame( animate );
         cvs.width = cvs.width;
+
+        // update game state
 
         if (moving) {
             anim[1-movedir%2] += ((movedir>38)?1:-1)*step;
@@ -116,7 +125,8 @@ window.onload = function() {
                         dir: (movedir-35)%4
                     })
                     flash = 10;
-                    movequeue = []
+                    movequeue = [39]
+                    deaths++;
                 } else {
                     moving = true;
                 }
@@ -130,32 +140,57 @@ window.onload = function() {
             genMaze();
             splatters = []
             player = [0,maze_size]
+            level++;
         }
+
+        // draw game
 
         for (var i = 0; i < segm_size; i++) {
             for (var j = 0 ; j < segm_size; j++) {
                 ctx.fillStyle = (maze[j][i])?'black':'white';
-                ctx.fillRect(j*wall_size,i*wall_size,wall_size,wall_size)
+                ctx.fillRect(j*wall_size+(cvs.width-screen_size)/2,i*wall_size+(cvs.height-screen_size)/2,wall_size,wall_size)
             }
         }
 
+        // draw flash
+
         ctx.fillStyle = (0==flash)?'black':'rgba(0,0,0,'+(1-flash/10)+')'
-        ctx.fillRect(0,0,screen_size, cvs.height);
+        ctx.fillRect(0,0,cvs.width, cvs.height);
 
         if (flash > 0) flash--;
 
+        // draw splatters
+
         splatters.forEach(function(data) {
             ctx.save();
-        	ctx.translate((data.pos[0]+.5)*wall_size,(data.pos[1]+.5)*wall_size);
+        	ctx.translate((data.pos[0]+.5)*wall_size+(cvs.width-screen_size)/2,(data.pos[1]+.5)*wall_size+(cvs.height-screen_size)/2);
         	ctx.rotate((data.dir+2)*Math.PI/2);
         	ctx.drawImage(splatter, 0, -wall_size/2, wall_size/2, wall_size);
         	ctx.restore();
         })
 
+        // draw player
+
         ctx.beginPath();
-        ctx.arc((player[0]+anim[0]+.5)*wall_size,(player[1]+anim[1]+.5)*wall_size, wall_size/2-5, 0, 2*Math.PI)
+        ctx.arc((player[0]+anim[0]+.5)*wall_size+(cvs.width-screen_size)/2,(player[1]+anim[1]+.5)*wall_size+(cvs.height-screen_size)/2, wall_size/2-5, 0, 2*Math.PI)
         ctx.fillStyle = 'white'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
         ctx.fill();
+
+        // draw text
+
+        var deathtext = "deaths: " + deaths
+        var leveltext = "level: " + level
+        ctx.font = '56px Insanity'
+        ctx.fillText(title, cvs.width/2, (cvs.height-screen_size)/4)
+        ctx.font = '48px Insanity'
+        ctx.fillText(deathtext, cvs.width-(cvs.width-screen_size)/4, cvs.height/2-24)
+        ctx.fillText(leveltext, cvs.width-(cvs.width-screen_size)/4, cvs.height/2+24)
+        ctx.font = '24px Insanity'
+        ctx.fillText(quote, cvs.width/2, cvs.height-(cvs.height-screen_size)/4)
+
+
     }
 
     genMaze();
