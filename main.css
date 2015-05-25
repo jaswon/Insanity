@@ -1,9 +1,5 @@
-@font-face {
-	font-family: Insanity; src: url('geo.ttf');
-}
+@font-face {font-family: Insanity; src: url('geo.ttf');}
 
-* { margin:0; padding:0; } /* to remove the top and left whitespace */
+* { margin:0; padding:0; }
 
-html, body { width:100%; height:100%; } /* just to be sure these are full screen*/
-
-canvas { display:block; font-family: Aldrich;}
+html, body { width:100%; height:100%; }

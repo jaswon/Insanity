@@ -118,7 +118,9 @@ window.onload = function() {
                 movedir = movequeue.pop();
                 var temp = player.slice(0);
                 temp[1-movedir%2] += (movedir>38)?1:-1;
-                if (maze[temp[0]][temp[1]] == 1) { // DEATH
+                if (maze[temp[0]] == undefined) { // MOVING OUT OF MAZE
+                    movequeue = [39]
+                } else if (maze[temp[0]][temp[1]] == 1) { // DEATH
                     player = [0,maze_size]
                     splatters.push({
                         pos: [temp[0],temp[1]],
