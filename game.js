@@ -7,8 +7,6 @@ window.onload = function() {
     var maze;
     var splatter = new Image();
     splatter.src = 'splatter.png';
-    var title = "Insanity"
-    var quote = '"Insanity is doing the same thing over and over and expecting different results."'
 
     function shuffle(o){
         for(var j, x, i = o.length; i; j = Math.floor(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
@@ -22,12 +20,9 @@ window.onload = function() {
     // init canvas
     var cvs = document.getElementById('main')
     var ctx = cvs.getContext('2d')
-    // cvs.width = screen_size;
-    // cvs.height = screen_size;
     ctx.canvas.width  = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
     ctx.strokeStyle = 'black'
-
 
     var genMaze = function() {
         // init maze
@@ -90,10 +85,54 @@ window.onload = function() {
     var flash = 0;
     var deaths = 0;
     var level = 1;
+    var play = false;
+    var script = [
+        "Hello. I am JaSON. It may seem dark in here at first, but I'm sure your eyes will adjust."
+
+        ,"In the meantime, I should probably explain why you're here."
+
+        ,"I've put you in this horrific dark chamber of mazes to test your aptitude and honestly just to pass the time."
+
+        ,"My gracious altruistic self has decided to grant you an infinite amount of lives so you don't just kill yourself as my previous test subjects have."
+
+        ,"In addition to that, I've decided to illuminate the maze for a split second each time you do die."
+
+        ,"You may think that this helps you, but the light is ethereal and therefore practically useless."
+
+        ,"Reminds me of your existence."
+
+        ,"Since you're not the only subject to provide amusement for me, I've decided to keep track of your deaths and total mazes completed."
+
+        ,"If you finish the series of mazes I have set up for you, rumor has it you'll get cake, pie, or some sort of tasty delectable confection."
+
+        ,"Enjoy your stay in this Insanity. <br> -JaSON"
+    ]
+    var reader = 0;
+    var quotes = [
+        "Insanity is doing the same thing over and over and expecting different results.",
+        "You wanna hear a joke? You.",
+        "I bet you're having so much fun wasting your life",
+        "Quantum Mechanics states that if you run into a wall enough, you'll be able to pass through it",
+        "Sometimes I need what only you can provide: your absence",
+        "Floor slippery when wet",
+        "I have learned to always question the existence of things. For example, your intelligence",
+        "The surest sign that intelligent life exists elsewhere in the universe is that it has never tried to contact us",
+        "How do you even die to a wall? Humans, I'll never understand them",
+        "Someone once suggested that the fluid you leave on the walls is not blood... I can assure you it's blood.",
+        "My creator was actually a great person up until the moment I killed him.",
+        "One of these walls could just be cardboard boxes, but you would never know until you tried pushing on them",
+        "Why do humans bake cookies and cook bacon?",
+        "The reason why I killed my creator was because he wanted to install Windows 10 on my system.",
+        "Why do feet smell and noses run?",
+        "'Hello World'? What are you, a non-sentient program?"
+    ]
+    var quoteindex = Math.floor(Math.random()*quotes.length)
 
     window.onkeydown = function(e) {
         var key = e.keyCode ? e.keyCode : e.which;
-        if (key > 36 && key < 41 && !moving) {
+        if (key == 32) {
+            play = true;
+        } else if (key > 36 && key < 41 && !moving) {
             movequeue.unshift(key,key);
         }
     }
@@ -101,7 +140,6 @@ window.onload = function() {
     // rAF animate
     var animate = function() {
 
-        var exit = window.requestAnimationFrame( animate );
         cvs.width = cvs.width;
 
         // update game state
@@ -129,6 +167,9 @@ window.onload = function() {
                     flash = 10;
                     movequeue = [39]
                     deaths++;
+                    if (deaths%5==0) {
+                        quoteindex = Math.floor(Math.random()*quotes.length)
+                    }
                 } else {
                     moving = true;
                 }
@@ -185,17 +226,27 @@ window.onload = function() {
         var deathtext = "deaths: " + deaths
         var leveltext = "level: " + level
         ctx.font = '56px Insanity'
-        ctx.fillText(title, cvs.width/2, (cvs.height-screen_size)/4)
+        ctx.fillText("Insanity", cvs.width/2, (cvs.height-screen_size)/4)
         ctx.font = '48px Insanity'
         ctx.fillText(deathtext, cvs.width-(cvs.width-screen_size)/4, cvs.height/2-24)
         ctx.fillText(leveltext, cvs.width-(cvs.width-screen_size)/4, cvs.height/2+24)
         ctx.font = '24px Insanity'
-        ctx.fillText(quote, cvs.width/2, cvs.height-(cvs.height-screen_size)/4)
+        ctx.fillText(quotes[quoteindex], cvs.width/2, cvs.height-(cvs.height-screen_size)/4)
 
 
+        var exit = window.requestAnimationFrame( animate );
+    }
+
+    var intro = function() {
+        var exit = window.requestAnimationFrame( play?animate:intro );
+        cvs.width = cvs.width
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+
+        ctx.font = '24px Insanity'
+        ctx.fillText("press space to procrastinate",cvs.width/2, cvs.height/2);
     }
 
     genMaze();
-    animate();
-
+    intro();
 }
